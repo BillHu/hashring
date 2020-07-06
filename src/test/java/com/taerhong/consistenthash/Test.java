@@ -7,6 +7,7 @@ import org.junit.Before;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 
 public class Test {
 
@@ -32,9 +33,9 @@ public class Test {
     public void standardDivision() {
         int numItems = 1000000;
         for (int i = 0; i < numItems; i++) {
-            CacheClient.getInstance().put(String.valueOf(i), String.valueOf(i));
+//            CacheClient.getInstance().put(String.valueOf(i), String.valueOf(i));
+            CacheClient.getInstance().put(UUID.randomUUID().toString(), String.valueOf(i));
         }
-        System.out.println("标准差 = " + CacheCluster.getInstance().standardDivision());
-        System.out.println("虚拟节点输 = " + CacheCluster.getInstance().NUM_VIRTUAL_NODES);
+        CacheCluster.getInstance().standardDivision();
     }
 }

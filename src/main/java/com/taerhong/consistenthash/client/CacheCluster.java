@@ -12,9 +12,13 @@ import java.util.*;
  */
 public class CacheCluster {
 
+    /**
+     * 每个真实节点的虚拟节点数
+     */
     public static final int NUM_VIRTUAL_NODES = 200;
 
     private static final CacheCluster instance = new CacheCluster();
+    private Integer key;
 
     private CacheCluster() {
     }
@@ -27,7 +31,7 @@ public class CacheCluster {
     /**
      * 虚拟节点，key：0 -> 2^32-1，value：服务端节点真实ip
      */
-    private SortedMap<Long, String> virtualNodes = new TreeMap<>();
+    private SortedMap<Integer, String> virtualNodes = new TreeMap<>();
 
     public static CacheCluster getInstance() {
         return instance;
@@ -50,6 +54,7 @@ public class CacheCluster {
         // 标准差
         double sd = .0f;
 
+        System.out.println("-----------------------------------------");
         for (String serverIp : result.keySet()) {
             totalCacheItemsCount += result.get(serverIp);
             System.out.println("ip = " + serverIp + ", caches = " + result.get(serverIp));
@@ -62,9 +67,11 @@ public class CacheCluster {
             variance += Math.pow(cacheCount - average, 2);
         }
         variance = variance / result.size();
-        System.out.println("方差 = " + variance);
-
         sd = Math.sqrt(variance);
+
+        System.out.println("标准差 = " + sd);
+        System.out.println("真实节点数 = " + result.size());
+        System.out.println("每个真实节点的虚拟节点数 = " + NUM_VIRTUAL_NODES);
         return sd;
     }
 
@@ -108,15 +115,15 @@ public class CacheCluster {
      */
     public String getServerIpForKey(String key) {
 
-        Long keyHash = Util.hashCodeFor(key);
+        Integer keyHash = Util.hashCodeFor(key);
         // 如果大于最大的虚拟节点key，则返回第一个节点的IP
         if (keyHash > virtualNodes.lastKey()) {
             return virtualNodes.get(virtualNodes.firstKey());
         }
 
         // 返回大于key的下一个缓存节点
-        SortedMap<Long, String> subMap = virtualNodes.tailMap(keyHash);
-        Long nodeKey = subMap.firstKey();
+        SortedMap<Integer, String> subMap = virtualNodes.tailMap(keyHash);
+        Integer nodeKey = subMap.firstKey();
         String nodeIp = subMap.get(nodeKey);
         return nodeIp;
     }
@@ -127,10 +134,9 @@ public class CacheCluster {
      * @param nodeIp
      */
     private void generateVirtualNodesFor(String nodeIp) {
-        this.virtualNodes.put(Util.hashCodeFor(nodeIp), nodeIp);
         for (int i = 0; i < NUM_VIRTUAL_NODES; i++) {
             String nodeName = nodeIp + "_" + i;
-            Long key = Util.hashCodeFor(nodeName);
+            Integer key = Util.hashCodeFor(nodeName);
             this.virtualNodes.put(key, nodeIp);
         }
     }
@@ -141,10 +147,9 @@ public class CacheCluster {
      * @param nodeIp
      */
     private void removeVirtualNodesFor(String nodeIp) {
-        this.virtualNodes.remove(Util.hashCodeFor(nodeIp));
         for (int i = 0; i < NUM_VIRTUAL_NODES; i++) {
             String nodeName = nodeIp + "_" + i;
-            Long key = Util.hashCodeFor(nodeName);
+            Integer key = Util.hashCodeFor(nodeName);
             this.virtualNodes.remove(key);
         }
     }
