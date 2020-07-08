@@ -18,7 +18,6 @@ public class CacheCluster {
     public static final int NUM_VIRTUAL_NODES = 200;
 
     private static final CacheCluster instance = new CacheCluster();
-    private Integer key;
 
     private CacheCluster() {
     }

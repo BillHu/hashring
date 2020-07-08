@@ -34,7 +34,7 @@ public class Test {
         int numItems = 1000000;
         for (int i = 0; i < numItems; i++) {
 //            CacheClient.getInstance().put(String.valueOf(i), String.valueOf(i));
-            CacheClient.getInstance().put(UUID.randomUUID().toString(), String.valueOf(i));
+            CacheClient.getInstance().put(UUID.randomUUID().toString(), UUID.randomUUID().toString());
         }
         CacheCluster.getInstance().standardDivision();
     }
